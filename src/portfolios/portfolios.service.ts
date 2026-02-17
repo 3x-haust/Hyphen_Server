@@ -5,6 +5,10 @@ import { Portfolio } from '../entities/portfolio.entity';
 import { CreatePortfolioDto } from '../dto/create-portfolio.dto';
 import { UpdatePortfolioDto } from '../dto/update-portfolio.dto';
 
+function normalizePortfolioCategory(category: string): string {
+  return category === 'service' ? 'platform' : category;
+}
+
 @Injectable()
 export class PortfoliosService {
   constructor(
@@ -13,7 +17,13 @@ export class PortfoliosService {
   ) {}
 
   async create(createPortfolioDto: CreatePortfolioDto): Promise<Portfolio> {
-    const portfolio = this.portfoliosRepository.create(createPortfolioDto);
+    const normalizedCategory = normalizePortfolioCategory(createPortfolioDto.category);
+    const payload: CreatePortfolioDto = {
+      ...createPortfolioDto,
+      category: normalizedCategory,
+      date: normalizedCategory === 'platform' ? '' : createPortfolioDto.date,
+    };
+    const portfolio = this.portfoliosRepository.create(payload);
     return await this.portfoliosRepository.save(portfolio);
   }
 
@@ -40,7 +50,14 @@ export class PortfoliosService {
     }
 
     if (category) {
-      queryBuilder.andWhere('portfolio.category = :category', { category });
+      const normalizedCategory = normalizePortfolioCategory(category);
+      if (normalizedCategory === 'platform') {
+        queryBuilder.andWhere('portfolio.category IN (:...categories)', {
+          categories: ['platform', 'service'],
+        });
+      } else {
+        queryBuilder.andWhere('portfolio.category = :category', { category: normalizedCategory });
+      }
     }
 
     queryBuilder
@@ -84,7 +101,16 @@ export class PortfoliosService {
     updatePortfolioDto: UpdatePortfolioDto,
   ): Promise<Portfolio> {
     const portfolio = await this.findOne(id);
-    Object.assign(portfolio, updatePortfolioDto);
+    const payload: UpdatePortfolioDto = { ...updatePortfolioDto };
+
+    if (payload.category) {
+      payload.category = normalizePortfolioCategory(payload.category);
+      if (payload.category === 'platform') {
+        payload.date = '';
+      }
+    }
+
+    Object.assign(portfolio, payload);
     return await this.portfoliosRepository.save(portfolio);
   }
 
