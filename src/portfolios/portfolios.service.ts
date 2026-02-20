@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Portfolio } from '../entities/portfolio.entity';
 import { CreatePortfolioDto } from '../dto/create-portfolio.dto';
 import { UpdatePortfolioDto } from '../dto/update-portfolio.dto';
@@ -17,7 +17,9 @@ export class PortfoliosService {
   ) {}
 
   async create(createPortfolioDto: CreatePortfolioDto): Promise<Portfolio> {
-    const normalizedCategory = normalizePortfolioCategory(createPortfolioDto.category);
+    const normalizedCategory = normalizePortfolioCategory(
+      createPortfolioDto.category,
+    );
     const payload: CreatePortfolioDto = {
       ...createPortfolioDto,
       category: normalizedCategory,
@@ -40,13 +42,15 @@ export class PortfoliosService {
     hasNext: boolean;
   }> {
     const skip = (page - 1) * pageSize;
-    
+
     const queryBuilder = this.portfoliosRepository
       .createQueryBuilder('portfolio')
       .where('portfolio.isActive = :isActive', { isActive: true });
 
     if (query) {
-      queryBuilder.andWhere('portfolio.name LIKE :query', { query: `%${query}%` });
+      queryBuilder.andWhere('portfolio.name LIKE :query', {
+        query: `%${query}%`,
+      });
     }
 
     if (category) {
@@ -56,7 +60,9 @@ export class PortfoliosService {
           categories: ['platform', 'service'],
         });
       } else {
-        queryBuilder.andWhere('portfolio.category = :category', { category: normalizedCategory });
+        queryBuilder.andWhere('portfolio.category = :category', {
+          category: normalizedCategory,
+        });
       }
     }
 

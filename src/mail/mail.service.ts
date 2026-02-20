@@ -25,7 +25,9 @@ export class MailService {
     answer: string,
   ): Promise<void> {
     const mailOptions = {
-      from: this.configService.get<string>('SMTP_FROM') || this.configService.get<string>('SMTP_USER'),
+      from:
+        this.configService.get<string>('SMTP_FROM') ||
+        this.configService.get<string>('SMTP_USER'),
       to,
       subject: `[문의 답변] ${inquirySubject}`,
       html: `

@@ -33,7 +33,12 @@ export class PortfoliosController {
   ) {
     const pageNum = page ? parseInt(page, 10) : 1;
     const pageSizeNum = pageSize ? parseInt(pageSize, 10) : 10;
-    return this.portfoliosService.findAll(pageNum, pageSizeNum, query, category);
+    return this.portfoliosService.findAll(
+      pageNum,
+      pageSizeNum,
+      query,
+      category,
+    );
   }
 
   @Get('slug/:slug')
