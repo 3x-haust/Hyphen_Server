@@ -44,8 +44,8 @@ export class Portfolio {
   @Column({ type: 'int', nullable: true })
   sponsorsCount: number;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
-  link: string;
+  @Column({ type: 'text', nullable: true })
+  links: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   galleryFolder: string;

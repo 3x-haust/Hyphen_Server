@@ -57,7 +57,7 @@ export class CreatePortfolioDto {
 
   @IsString()
   @IsOptional()
-  link?: string;
+  links?: string;
 
   @IsString()
   @IsOptional()

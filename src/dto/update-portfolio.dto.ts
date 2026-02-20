@@ -50,7 +50,7 @@ export class UpdatePortfolioDto {
 
   @IsString()
   @IsOptional()
-  link?: string;
+  links?: string;
 
   @IsString()
   @IsOptional()
