@@ -38,7 +38,7 @@ export class UploadController {
         }
         cb(null, true);
       },
-      limits: { fileSize: 10 * 1024 * 1024 },
+      limits: { fileSize: 50 * 1024 * 1024 },
     }),
   )
   async uploadFile(@UploadedFile() file: MulterFile) {
@@ -55,11 +55,26 @@ export class UploadController {
     const outputPath = join(uploadsDir, filename);
 
     try {
-      const webpBuffer = await sharp(file.buffer)
-        .webp({ quality: 80 })
-        .toBuffer();
+      const image = sharp(file.buffer);
+      const metadata = await image.metadata();
+      
+      let processedBuffer: Buffer;
+      
+      if ((metadata.width && metadata.width > 4000) || (metadata.height && metadata.height > 4000)) {
+        processedBuffer = await image
+          .resize(4000, 4000, { 
+            fit: 'inside',
+            withoutEnlargement: true 
+          })
+          .webp({ quality: 95 })
+          .toBuffer();
+      } else {
+        processedBuffer = await image
+          .webp({ quality: 95 })
+          .toBuffer();
+      }
 
-      await writeFile(outputPath, webpBuffer);
+      await writeFile(outputPath, processedBuffer);
 
       return {
         url: `/uploads/${filename}`,
