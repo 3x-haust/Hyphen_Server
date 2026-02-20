@@ -8,8 +8,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // uploads 폴더가 없으면 생성
-  const uploadsDir = join(__dirname, '..', 'uploads');
+  const uploadsDir = process.env.UPLOADS_DIR || join(__dirname, '..', 'uploads');
   if (!existsSync(uploadsDir)) {
     mkdirSync(uploadsDir, { recursive: true });
   }

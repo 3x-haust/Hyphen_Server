@@ -8,7 +8,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { join } from 'path';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
+import { writeFile } from 'fs/promises';
 import sharp from 'sharp';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -41,7 +42,7 @@ export class UploadController {
     }),
   )
   async uploadFile(@UploadedFile() file: MulterFile) {
-    const uploadsDir = './uploads';
+    const uploadsDir = process.env.UPLOADS_DIR || './uploads';
     if (!existsSync(uploadsDir)) {
       mkdirSync(uploadsDir, { recursive: true });
     }
@@ -58,7 +59,7 @@ export class UploadController {
         .webp({ quality: 80 })
         .toBuffer();
 
-      writeFileSync(outputPath, webpBuffer);
+      await writeFile(outputPath, webpBuffer);
 
       return {
         url: `/uploads/${filename}`,
